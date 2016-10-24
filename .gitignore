@@ -7,3 +7,7 @@ dist
 coverage
 ts-out
 npm-debug.log
+**/.DS_Store
+.vscode
+.editorconfig
+.npmrc
