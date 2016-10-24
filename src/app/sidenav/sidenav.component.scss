@@ -1,0 +1,20 @@
+
+bt-sidenav {
+    overflow: visible !important;
+    z-index: 60;
+    >md-sidenav {
+        max-width: 220px;
+        height: 100%;
+
+        md-list-item {
+            border-top: 1px solid transparent;
+            border-bottom: 1px solid transparent;
+            
+            &.active {
+                background:#efefef;
+                border-top:1px solid #dfdfdf;
+                border-bottom: 1px solid #dfdfdf
+            }
+        }
+    }
+}

@@ -1,0 +1,16 @@
+bt-meeting-room {
+    md-list-item {
+        .md-button {
+            md-progress-circular {
+                position:absolute;
+                left:16px;
+                top:24px;
+            }
+        }
+        md-progress-circular {
+            position:absolute;
+            left:16px;
+            top:16px;
+        }
+    }
+}
