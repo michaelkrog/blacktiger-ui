@@ -5,7 +5,7 @@ import { MeetingService, Room, Participant, SwitchBoardService,
 @Component({
     selector: 'bt-event-generator',
     template: `
-  <div layout="row" md-colors="{background: 'accent'}" flex>
+  <div layout="row" md-colors="{background: 'warn-50'}" flex>
     <md-button class="md-raised" ng-click="$ctrl.startConf()">Start møde</md-button>
     <md-button class="md-raised" ng-click="$ctrl.endConf()">Stop møde</md-button>
     <md-button class="md-raised" ng-click="$ctrl.addHost()">+ host</md-button>

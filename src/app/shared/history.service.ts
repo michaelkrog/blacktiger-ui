@@ -4,6 +4,22 @@ import { Participant } from './participant.model';
 import { SwitchBoardService } from './switch-board.service';
 import { ConferenceEvent, ConferenceStartEvent, ParticipantEvent, PhonebookUpdateEvent} from './event.model';
 
+export interface Call {
+    start: number;
+    end: number;
+}
+
+export interface HistoryEntry {
+    type: string;
+    callerId: string;
+    phoneNumber: string;
+    name: string;
+    firstCall: number;
+    calls: Call[],
+    channel: string;
+    totalDuration: number;
+}
+
 @Injectable()
 export class HistoryService {
     private historyVariableName;
@@ -16,7 +32,7 @@ export class HistoryService {
         this.historyVariableName = 'meetingHistory-1';
         // var history = localStorageService.get(historyVariableName);
 
-        if (!history || !angular.isObject(history)) {
+        if (!this.history || !angular.isObject(this.history)) {
             this.cleanHistory(false);
         }
 
@@ -49,7 +65,7 @@ export class HistoryService {
         this.log.debug('Resetting history data [keepActiveCalls=' + keepActiveCalls + ']');
         if (keepActiveCalls) {
 
-            angular.forEach(history, function (room, key) {
+            angular.forEach(this.history, function (room, key) {
                 let entriesToDelete = [];
                 angular.forEach(room, function (entry, key) {
                     for (let i = entry.calls.length - 1; i >= 0; i--) {
@@ -78,14 +94,14 @@ export class HistoryService {
 
     createRoomEntry(roomNo: string) {
         this.log.debug('Creating new entry.');
-        history[roomNo] = {};
+        this.history[roomNo] = {};
     }
 
     handleConferenceStart(room: Room) {
         this.log.debug('HistorySvc:handleConferenceStart');
         let initializing = false;
         
-        if (history[room.id] === undefined) {
+        if (this.history[room.id] === undefined) {
             this.createRoomEntry(room.id);
         }
 
@@ -99,8 +115,8 @@ export class HistoryService {
 
     handleJoin(roomNo: string, participant: Participant, resume?: boolean) {
         this.log.debug('HistorySvc:handleJoinEvent');
-        let entries; 
-        let entry;
+        let entries: HistoryEntry[]; 
+        let entry: HistoryEntry;
         let key; 
         let timestamp = new Date().getTime();
         
@@ -113,7 +129,7 @@ export class HistoryService {
             return;
         }
 
-        if (!angular.isDefined(history[roomNo])) {
+        if (!angular.isDefined(this.history[roomNo])) {
             this.createRoomEntry(roomNo);
         }
 
@@ -121,7 +137,7 @@ export class HistoryService {
             throw 'Participant does not have a callerId specified.';
         }
 
-        entries = history[roomNo];
+        entries = this.history[roomNo];
         key = participant.callerId;
         this.log.debug('New participant - adding to history [key=' + key + '].');
         if (entries[key] === undefined) {
@@ -164,11 +180,11 @@ export class HistoryService {
         this.log.debug('HistorySvc:handleLeaveEvent');
         let changed = false;
 
-        if (!angular.isDefined(history[roomNo])) {
+        if (!angular.isDefined(this.history[roomNo])) {
             this.createRoomEntry(roomNo);
         }
 
-        let entries = history[roomNo];
+        let entries = this.history[roomNo];
         for (let key in entries) {
             let entry = entries[key];
             if (entry.channel === channel) {
@@ -196,7 +212,7 @@ export class HistoryService {
 
     handlePhoneBookUpdate(phoneNumber: string, name: string) {
         this.log.debug('HistorySvc:handlePhoneBookUpdate');
-        angular.forEach(history, function (entries) {
+        angular.forEach(this.history, function (entries) {
             angular.forEach(entries, function (entry) {
                 if (phoneNumber === entry.phoneNumber) {
                     entry.name = name;
@@ -207,7 +223,7 @@ export class HistoryService {
         this.fireUpdated();
     }
 
-    doFind(room?: string, callerId?: string, active?: boolean): Room[] {
+    doFind(room?: string, callerId?: string, active?: boolean): HistoryEntry[] {
         if (room && !angular.isString(room)) {
             throw 'Room must be specified as String.';
         }
@@ -216,12 +232,12 @@ export class HistoryService {
         let currentRoom: string;
 
         this.log.debug('Finding entries [room=' + room + ';callerId=' + callerId + ';active=' + active + ']');
-        for (currentRoom in history) {
+        for (currentRoom in this.history) {
             if (!angular.isDefined(room) || room === room) {
-                for (let key in history[currentRoom]) {
+                for (let key in this.history[currentRoom]) {
                     let accepted = true;
                     let _active = false;
-                    let entry = history[currentRoom][key];
+                    let entry = this.history[currentRoom][key];
 
                     if (angular.isDefined(callerId)) {
                         accepted = (entry.callerId === callerId);
@@ -265,7 +281,7 @@ export class HistoryService {
         return duration;
     }
 
-    findOneByRoomAndCallerId(room, callerId) {
+    findOneByRoomAndCallerId(room, callerId): HistoryEntry {
         let entries = this.doFind(angular.isObject(room) ? room.id : room, callerId);
         if (entries.length === 0) {
             return null;
@@ -278,23 +294,23 @@ export class HistoryService {
         this.cleanHistory(keepActiveCalls);
     }
 
-    findAll() {
+    findAll(): HistoryEntry[] {
         return this.doFind();
     }
 
-    findAllByRoom(room) {
+    findAllByRoom(room): HistoryEntry[] {
         return this.doFind(angular.isObject(room) ? room.id : room);
     }
 
-    findAllByActive(active) {
+    findAllByActive(active): HistoryEntry[] {
         return this.doFind(undefined, undefined, active);
     }
 
-    findAllByRoomAndActive(room, active) {
+    findAllByRoomAndActive(room, active): HistoryEntry[] {
         return this.doFind(angular.isObject(room) ? room.id : room, undefined, active);
     }
 
-    getVariableName() {
+    getVariableName(): string {
         return this.historyVariableName;
     }
 }
