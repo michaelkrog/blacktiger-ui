@@ -54,13 +54,13 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
       <md-list ng-if="$ctrl.tab === 'activity'">
         
         <md-list-item class="md-3-line" ng-repeat="participant in $ctrl.room.participants | orderBy: 'name' | filter: {host:false}" 
-          ng-click="goToPerson(person.name, $event)" md-colors="participant.muted ? {} : {background: 'accent-50'}">
+          ng-click="$ctrl.clickParticipant(participant, $event)" md-colors="participant.muted ? {} : {background: 'accent-50'}">
           <md-icon ng-if="!participant.avatar && participant.muted" class="md-avatar-icon">phone</md-icon>
           <md-icon ng-if="!participant.muted" class="md-avatar-icon">volume_up</md-icon>
           <md-progress-circular ng-if="!participant.muted" md-diameter="40" class="md-accent md-hue-3"></md-progress-circular>
           <img ng-src="{{participant.avatar}}" ng-if="participant.avatar" class="md-avatar" />
           <div class="md-list-item-text">
-            <h3>{{participant.name}}</h3>
+            <h3>{{participant.name}} ({{participant.phoneNumber}})</h3>
             <h4>10 minutter - 1 opkald</h4>
             <p>Første opringning 15:50</p>
             <md-button class="md-secondary md-icon-button" ng-click="$ctrl.toggleMute(participant)">
@@ -111,7 +111,7 @@ export class MeetingRoomComponent implements OnInit {
 
   constructor( @Inject('$log') private log: ng.ILogService,
     @Inject('$mdSidenav') private mdSideNav: ng.material.ISidenavService, private meetingService: MeetingService,
-    private historyService: HistoryService) {
+    private historyService: HistoryService, @Inject('$mdDialog') private mdDialog: angular.material.IDialogService) {
     this.meetingService.onMeetingStart.subscribe((room: Room) => {
       this.room = room;
     });
@@ -121,7 +121,7 @@ export class MeetingRoomComponent implements OnInit {
     });
 
     this.historyService.onHistoryUpdated.subscribe(() => {
-      this.historyEntries = this.historyService.findAllByRoom(this.room);
+      this.historyEntries = this.historyService.findAllByRoomAndActive(this.room, false);
     });
   }
 
@@ -135,6 +135,22 @@ export class MeetingRoomComponent implements OnInit {
 
   toggleMute(participant: Participant) {
     participant.muted = !participant.muted;
+  }
+
+  clickParticipant(p: Participant, ev?: MouseEvent) {
+    let prompt = this.mdDialog.prompt()
+          .title('Redigér navn')
+          .textContent('Angiv nyt navn for ' + p.phoneNumber)
+          .placeholder('Navn på person')
+          .ariaLabel('Navn på person')
+          .initialValue(p.name)
+          .targetEvent(ev)
+          .ok('Ok')
+          .cancel('Annuller');
+
+    this.mdDialog.show(prompt).then(function() {
+      
+    });
   }
 
   hasRoom(): boolean {
