@@ -25,9 +25,9 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
         <span class="md-caption">Opret forbindelse for at udsende mødet til tilhørerene</span>
       </div>
       <div flex></div>
-      <div>
+      <!--div>
         <md-button class="md-raised">Opret forbindelse</md-button>
-      </div>
+      </div-->
     </div>
 
     <div layout-padding layout="row" ng-if="$ctrl.hasHost()">
@@ -36,9 +36,9 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
         <span class="md-caption">Siden {{$ctrl.getHost().dateJoined | date:'shortTime'}}</span>
       </div>
       <div flex></div>
-      <div>
+      <!--div>
         <md-button class="md-raised">Afbryd forbindelse</md-button>
-      </div>
+      </div-->
     </div>
 
 
@@ -53,7 +53,7 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
       
       <md-list ng-if="$ctrl.tab === 'activity'">
         
-        <md-list-item class="md-3-line" ng-repeat="participant in $ctrl.room.participants | orderBy: 'name' | filter: {host:false}" 
+        <md-list-item class="md-2-line" ng-repeat="participant in $ctrl.room.participants | orderBy: 'name' | filter: {host:false}" 
           ng-click="$ctrl.clickParticipant(participant, $event)" md-colors="participant.muted ? {} : {background: 'accent-50'}">
           <md-icon ng-if="!participant.avatar && participant.muted" class="md-avatar-icon">phone</md-icon>
           <md-icon ng-if="!participant.muted" class="md-avatar-icon">volume_up</md-icon>
@@ -61,8 +61,7 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
           <img ng-src="{{participant.avatar}}" ng-if="participant.avatar" class="md-avatar" />
           <div class="md-list-item-text">
             <h3>{{participant.name}} ({{participant.phoneNumber}})</h3>
-            <h4>10 minutter - 1 opkald</h4>
-            <p>Første opringning 15:50</p>
+            <p>10 minutter - 1 opkald siden 15:50</p>
             <md-button class="md-secondary md-icon-button" ng-click="$ctrl.toggleMute(participant)">
               <md-tooltip>
                 <span ng-if="participant.muted">Åbn mikrofon</span>
@@ -105,7 +104,7 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
 export class MeetingRoomComponent implements OnInit {
 
   private activeTab = 'activity';
-  private room: Room;
+  private room: Room = null;
   private historyEntries: HistoryEntry[] = [];
   private tab = 'activity';
 
@@ -154,7 +153,7 @@ export class MeetingRoomComponent implements OnInit {
   }
 
   hasRoom(): boolean {
-    return angular.isObject(this.room);
+    return this.room != null;
   }
 
   getHost(): Participant {

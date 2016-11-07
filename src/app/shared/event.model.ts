@@ -6,7 +6,7 @@ export interface ConferenceEvent {
     type: string;
 }
 
-export interface ConferenceStartEvent extends ConferenceEvent{
+export interface ConferenceStartEvent extends ConferenceEvent {
     room: Room;
 }
 

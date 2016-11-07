@@ -23,7 +23,7 @@ const DESTINATION = path.resolve( __dirname, 'dist' );
 const METADATA = {
   baseUrl: '/',
   lang: 'en',
-  title: 'Telesal',
+  title: 'Tombaugh Regio',
   ENV: JSON.stringify( ENV ),
   host: '0.0.0.0',
   // port is determined from npm config
@@ -103,7 +103,7 @@ const webpackConfigLoaders = [
   {
     test: /\.ts$/,
     exclude: [ /node_modules/ ],
-    loader: 'ts-loader'
+    loader: 'awesome-typescript-loader'
   },
 
   // Styles

@@ -45,7 +45,7 @@ export class MeetingService {
 
     private hasHost(room): boolean {
         let i;
-        if (room && angular.isArray(room.participants)) {
+        if (room && room.participants) {
             for (i = 0; i < room.participants.length; i++) {
                 if (room.participants[i].host === true) {
                     return true;
@@ -57,7 +57,7 @@ export class MeetingService {
 
     private getParticipantFromRoomByChannel(room, channel): Participant {
         let i;
-        if (room && angular.isArray(room.participants)) {
+        if (room && room.participants) {
             for (i = 0; i < room.participants.length; i++) {
                 if (room.participants[i].channel === channel) {
                     return room.participants[i];
@@ -73,7 +73,7 @@ export class MeetingService {
         for (let i = 0; i < this.rooms.length; i++) {
             for (let e = 0; e < this.rooms[i].participants.length; e++) {
                 p = this.rooms[i].participants[e];
-                if (!angular.isDefined(filter) || filter(p) === true) {
+                if (!filter || filter(p) === true) {
                     count++;
                 }
             }
@@ -99,7 +99,7 @@ export class MeetingService {
         let existingRoom = this.getRoomById(room.id);
         this.log.debug('ConfStartEvent [room=' + room + ']');
         if (existingRoom === null) {
-            if (!angular.isArray(room.participants)) {
+            if (!room.participants) {
                 room.participants = [];
             }
             this.rooms.push(room);
@@ -118,11 +118,13 @@ export class MeetingService {
 
     private handleJoin(roomNo: string, participant: Participant) {
         let room = this.getRoomById(roomNo);
-        let existingParticipant = this.getParticipantFromRoomByChannel(room, participant.channel);
+        if (room != null) {
+            let existingParticipant = this.getParticipantFromRoomByChannel(room, participant.channel);
 
-        if (existingParticipant === null) {
-            room.participants.push(participant);
-            this.onMeetingJoin.emit({room: room, participant: participant});
+            if (existingParticipant === null) {
+                room.participants.push(participant);
+                this.onMeetingJoin.emit({room: room, participant: participant});
+            }
         }
     };
 

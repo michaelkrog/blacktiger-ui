@@ -8,21 +8,22 @@ import { MeetingService, Room, Participant, SwitchBoardService,
   <div layout="row" md-colors="{background: 'warn-50'}" flex>
     <md-button class="md-raised" ng-click="$ctrl.startConf()">Start møde</md-button>
     <md-button class="md-raised" ng-click="$ctrl.endConf()">Stop møde</md-button>
-    <md-button class="md-raised" ng-click="$ctrl.toggleHost()">Toggle host</md-button>
-    <md-button class="md-raised" ng-disabled="!$ctrl.hasMoreParticipants()" ng-click="$ctrl.addParticipant()">+ Participant</md-button>
-    <md-button class="md-raised" ng-disabled="!$ctrl.hasActiveParticipants()" ng-click="$ctrl.removeParticipant()">- Participant</md-button>
+    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive" ng-click="$ctrl.toggleHost()">Toggle host</md-button>
+    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive || !$ctrl.hasMoreParticipants()" ng-click="$ctrl.addParticipant()">+ Participant</md-button>
+    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive || !$ctrl.hasActiveParticipants()" ng-click="$ctrl.removeParticipant()">- Participant</md-button>
   </div>
   `
 })
 export class EventGeneratorComponent {
 
     names = ['Kaj Jensen', 'Yvonne Nielsen', 'Michael Krog', 'Peter Frederiksen', 'Thomas Frederiksen', 'Edmund Atta',
-        'Otto Sørensen', 'Otto Ravn', 'Lars Thomsen', 'Michelle Thomsen', 'Janatan Trip', 'Jens Søndergaard', 'Pernille Madsen',
+        'Otto Sørensen', 'Otto Ravn', 'Lars Thomsen', 'Michelle Thomsen', 'Jonatan Trip', 'Jens Søndergaard', 'Pernille Madsen',
         'Nicklas Jensen', 'Kezia Jensen', 'Thomas Borch', 'Christina Borch'];
     
     participants: Participant[] = [];
     activeParticipants: Participant[] = [];
     hostActive = false;
+    meetingRoomActive = false;
 
     constructor(private switchBoard: SwitchBoardService) {
         for (let i = 0; i < this.names.length; i++) {
@@ -64,6 +65,7 @@ export class EventGeneratorComponent {
             }
         };
         this.switchBoard.onConferenceStart.emit(ev);
+        this.meetingRoomActive = true;
     }
 
     endConf() {
@@ -72,6 +74,8 @@ export class EventGeneratorComponent {
             type: 'ConferenceEndEvent'
         };
         this.switchBoard.onConferenceEnd.emit(ev);
+
+        this.meetingRoomActive = false;
     }
 
     toggleHost() {

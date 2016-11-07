@@ -1,18 +1,16 @@
 {
-  "name": "blacktiger-controller",
+  "name": "blacktiger-ui",
   "version": "3.0.0",
-  "description": "UI for blacktiger",
+  "description": "UI for Blacktiger",
   "main": "app/app.js",
   "config": {
     "port": "9000"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/drbit/blacktiger-controller"
+    "url": "git+https://github.com/michaelkrog/blacktiger-ui.git"
   },
   "scripts": {
-    "typings": "typings",
-    "postinstall": "rimraf typings/ && typings install",
     "start": "npm run server",
     "build": "NODE_ENV=production webpack --config webpack-build.config.js",
     "build:dev": "webpack --progress --profile --colors --display-error-details --display-cached",
@@ -26,28 +24,39 @@
   "contributors": [
     "Michael Krog <mic@apaq.dk>"
   ],
-  "license": "ISC",
+  "license": "GPL-3.0",
   "dependencies": {
-    "angular": "1.5.7",
+    "@types/angular": "1.5.16",
+    "@types/angular-animate": "1.5.5",
+    "@types/angular-material": "1.1.40",
+    "@types/angular-route": "1.3.2",
+    "@types/core-js": "0.9.34",
+    "angular": "1.5.8",
     "angular-animate": "1.5.8",
     "angular-aria": "1.5.8",
     "angular-material": "1.1.1",
+    "angular-route": "1.5.8",
     "core-js": "2.4.1",
-    "ng-metadata": "2.1.1",
-    "reflect-metadata": "0.1.3",
-    "rxjs": "5.0.0-beta.6",
-    "ts-helpers": "1.1.1"
+    "ng-metadata": "3.0.2",
+    "reflect-metadata": "0.1.8",
+    "rxjs": "5.0.0-rc.1",
+    "ts-helpers": "1.1.2"
   },
   "devDependencies": {
-    "angular-mocks": "1.5.7",
+    "@types/angular-mocks": "1.5.5",
+    "@types/lodash": "4.14.37",
+    "@types/jasmine": "2.5.35",
+    "@types/node": "6.0.45",
+    "angular-mocks": "1.5.8",
+    "awesome-typescript-loader": "2.2.4",
     "codelyzer": "0.0.26",
     "copy-webpack-plugin": "3.0.1",
-    "css-loader": "0.23.1",
-    "html-webpack-plugin": "2.22.0",
+    "css-loader": "0.25.0",
+    "html-webpack-plugin": "2.24.0",
     "istanbul-instrumenter-loader": "0.2.0",
-    "jasmine-core": "2.4.1",
+    "jasmine-core": "2.5.2",
     "json-loader": "0.5.4",
-    "karma": "1.1.1",
+    "karma": "1.3.0",
     "karma-chrome-launcher": "1.0.1",
     "karma-coverage": "1.1.0",
     "karma-firefox-launcher": "1.0.0",
@@ -56,25 +65,23 @@
     "karma-phantomjs-launcher": "1.0.1",
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "1.7.0",
-    "lodash": "4.14.2",
-    "node-sass": "3.8.0",
+    "lodash": "4.16.5",
+    "node-sass": "3.10.1",
     "phantomjs-prebuilt": "2.1.7",
     "raw-loader": "0.5.1",
     "remap-istanbul": "0.6.4",
     "rimraf": "2.5.4",
-    "sass-loader": "3.2.2",
+    "sass-loader": "4.0.2",
     "source-map-loader": "0.1.5",
     "style-loader": "0.13.1",
-    "ts-loader": "0.8.2",
-    "tslint": "3.13.0",
+    "tslint": "3.15.1",
     "tslint-loader": "2.1.5",
-    "typescript": "1.8.10",
-    "typings": "1.3.2",
-    "webpack": "1.13.1",
-    "webpack-dev-server": "1.14.1"
+    "typescript": "2.0.6",
+    "webpack": "1.13.3",
+    "webpack-dev-server": "1.16.2"
   },
   "engines": {
-    "node": ">= 4.2.1",
+    "node": ">= 6.x",
     "npm": ">= 3"
   }
 }
