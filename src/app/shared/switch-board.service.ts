@@ -1,6 +1,7 @@
 import { Injectable, Inject, EventEmitter } from 'ng-metadata/core';
 import { Room } from './room.model';
 import { ConferenceEvent, ParticipantEvent, PhonebookUpdateEvent} from './event.model';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class SwitchBoardService {
@@ -17,5 +18,16 @@ export class SwitchBoardService {
     onMute = new EventEmitter<ParticipantEvent>();
     onUnmute = new EventEmitter<ParticipantEvent>();
     onPhoneBookUpdate = new EventEmitter();
+
+    constructor(@Inject('$log') private log: ng.ILogService) {
+
+    }
+
+    public addDataSource(observable: Observable<ConferenceEvent>) {
+        this.log.debug('Adding datasource');
+        observable.subscribe((data: ConferenceEvent) => {
+            this.log.debug(data);
+        });
+    }
     
 }

@@ -1,43 +1,35 @@
 import { Injectable, Inject, EventEmitter } from 'ng-metadata/core';
 import { Room } from './room.model';
+import { Observable } from 'rxjs/Observable';
+import { Subscriber } from 'rxjs/Subscriber';
+import { BaseService } from './base.service';
+import { Blacktiger } from './blacktiger'
 
 @Injectable()
-export class RoomService {
+export class RoomService extends BaseService {
 
-    _rooms: Room[] = [
-        {
-            id: '1',
-            name: 'Aalborg Kærby',
-            postalCode: '9000',
-            city: 'Aalborg',
-            countryCallingCode: '45',
-            phoneNumber: '+4522334455',
-            hallNumber: '2',
-            contact: {
-                comment: '',
-                email: 'test@test.dk',
-                name: 'John Doe',
-                phoneNumber: '+4533224433'
-            },
-            participants: undefined
-        }
-    ];
-
-    findAll(search?: string, mode?: string): Room[] {
-        return this._rooms;
+    constructor(@Inject('$http') private http: ng.IHttpService) {
+        super();
     }
 
-    get(id): Room {
-        let room;
-        this._rooms.forEach((current) => {
-            if (current.id === id) {
-                room = current;
+    findAll(search?: string, mode?: string): Promise<Room[]> {
+        let config: angular.IRequestShortcutConfig = {
+            headers: {
+                common: {
+                    search: search,
+                    mode: mode
+                }
             }
-        });
-        return room;
+        };
+
+        return this.http.get(Blacktiger.serviceUrl + '/rooms', this.appendAuth(config)).then(response => response.data);
     }
 
-    save(room: Room): Room {
-        return room;
+    get(id): Promise<Room> {
+        return this.http.get(Blacktiger.serviceUrl + '/rooms/' + id, this.appendAuth()).then(response => response.data);
+    }
+
+    save(room: Room): Promise<Room> {
+        return this.http.put(Blacktiger.serviceUrl + '/rooms/' + room.id, this.appendAuth()).then(response => response.data);
     }
 }

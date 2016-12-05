@@ -251,16 +251,16 @@ export class MeetingService {
         return this.getRoomById(id);
     }
 
-    kickByRoomAndChannel(room, participant) {
+    kickByRoomAndChannel(room: string, participant: Participant) {
         this.participantService.kick(room, participant.channel);
     }
         
-    muteByRoomAndChannel(room, participant) {
+    muteByRoomAndChannel(room: string, participant: Participant) {
         this.participantService.mute(room, participant.channel);
         participant.commentRequested = false;
     }
         
-    unmuteByRoomAndChannel(room, participant) {
+    unmuteByRoomAndChannel(room: string, participant: Participant) {
         if (!this.hasHost(this.getRoomById(room))) {
             this.log.warn('Room \'' + room + '\' has no host. It is not possible to unmute participants in rooms without a host.')
             return;

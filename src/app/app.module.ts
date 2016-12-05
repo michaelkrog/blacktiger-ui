@@ -5,8 +5,10 @@ import { SidenavComponent } from './sidenav/sidenav.component'
 import { EventGeneratorComponent } from './event-generator/event-generator.component'
 import { MeetingRoomComponent } from './meeting-room/meeting-room.component'
 import { SidenavToggleComponent } from './sidenav-toggle/sidenav-toggle.component'
+import { SigninComponent } from './signin/signin.component';
 
-import { MeetingService, ParticipantService, SwitchBoardService, HistoryService, RoomService } from './shared';
+import { MeetingService, ParticipantService, SwitchBoardService, HistoryService, 
+  RoomService, AuthenticationService } from './shared';
 
 import * as router from 'angular-route';
 import * as ngMaterial from 'angular-material';
@@ -19,7 +21,8 @@ import { provideState } from './app.config';
     SidenavComponent,
     MeetingRoomComponent,
     SidenavToggleComponent,
-    EventGeneratorComponent
+    EventGeneratorComponent,
+    SigninComponent
   ],
   providers: [
     ngMaterial,
@@ -29,7 +32,8 @@ import { provideState } from './app.config';
     ParticipantService,
     SwitchBoardService,
     HistoryService,
-    RoomService
+    RoomService,
+    AuthenticationService
   ]
 } )
 export class AppModule {

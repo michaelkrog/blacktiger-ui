@@ -23,7 +23,7 @@ const DESTINATION = path.resolve( __dirname, 'dist' );
 const METADATA = {
   baseUrl: '/',
   lang: 'en',
-  title: 'Tombaugh Regio',
+  title: 'Telesal',
   ENV: JSON.stringify( ENV ),
   host: '0.0.0.0',
   // port is determined from npm config

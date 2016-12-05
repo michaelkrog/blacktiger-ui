@@ -1,30 +1,32 @@
 import { Injectable, Inject, EventEmitter } from 'ng-metadata/core';
 import { Participant } from './participant.model';
+import { Observable, Observer } from 'rxjs/Rx';
+import { Blacktiger } from './blacktiger';
+import { BaseService } from './base.service';
 
 @Injectable()
-export class ParticipantService {
+export class ParticipantService extends BaseService {
     _participants: Participant[] = [];
-    findAll(roomid): Participant[] {
-        return this._participants;
-    }
-        
-    get(roomId, id): Participant {
-        let participant;
-        this._participants.forEach((current) => {
-            if (current.callerId === id) {
-                participant = current;
-            }
-        });
-        return participant;
+
+    constructor(@Inject('$http') private http: ng.IHttpService) {
+        super();
     }
 
-    kick(roomId, id) {
-
-    }
-    mute(roomId, id) {
+    findAll(roomid): Promise<Participant[]> {
+        return this.http.get(Blacktiger.serviceUrl + '/rooms/' + roomid + '/participants', this.appendAuth());
     }
         
-    unmute(roomId, id) {
+    get(roomId, channel): Promise<Participant> {
+        return this.http.get(Blacktiger.serviceUrl + '/rooms/' + roomId + '/participants/' + channel, this.appendAuth());
+    }
+
+    kick(roomId: string, channel: string) {
+        return this.http.delete(Blacktiger.serviceUrl + '/rooms/' + roomId + '/participants/' + channel, this.appendAuth());
+    }
+    mute(roomId: string, id: string) {
+    }
+        
+    unmute(roomId: string, id: string) {
          
     
     }

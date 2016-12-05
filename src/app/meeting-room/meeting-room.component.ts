@@ -46,7 +46,9 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
     <div>
       <md-nav-bar md-selected-nav-item="$ctrl.activeTab" nav-bar-aria-label="navigation links">
         <md-nav-item md-nav-click="$ctrl.goto('activity')" name="activity">Aktive lyttere</md-nav-item>
-        <md-nav-item md-nav-click="$ctrl.goto('history')" name="history">Historik</md-nav-item>
+        <md-nav-item md-nav-click="$ctrl.goto('history')" name="history">
+          Historik<span ng-if="$ctrl.historyEntries.length>0"> &#9679;</span>
+        </md-nav-item>
       </md-nav-bar>
     </div>
     <md-content flex>
@@ -74,7 +76,7 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
                 speaker_notes_off
               </md-icon>
             </md-button>
-            <md-button class="md-secondary md-icon-button" ng-click="$ctrl.toggleMute(participant)">
+            <md-button class="md-secondary md-icon-button" ng-click="$ctrl.kick(participant)">
               <md-tooltip>Afbryd</md-tooltip>
               <md-icon class="md-hue-3">cancel</md-icon>
             </md-button>
@@ -109,8 +111,11 @@ export class MeetingRoomComponent implements OnInit {
   private tab = 'activity';
 
   constructor( @Inject('$log') private log: ng.ILogService,
-    @Inject('$mdSidenav') private mdSideNav: ng.material.ISidenavService, private meetingService: MeetingService,
-    private historyService: HistoryService, @Inject('$mdDialog') private mdDialog: angular.material.IDialogService) {
+    @Inject('$mdSidenav') private mdSideNav: ng.material.ISidenavService,
+    @Inject('$mdDialog') private mdDialog: angular.material.IDialogService, 
+    private meetingService: MeetingService,
+    private historyService: HistoryService) {
+      
     this.meetingService.onMeetingStart.subscribe((room: Room) => {
       this.room = room;
     });
@@ -136,19 +141,23 @@ export class MeetingRoomComponent implements OnInit {
     participant.muted = !participant.muted;
   }
 
+  kick(participant: Participant) {
+    this.meetingService.kickByRoomAndChannel(this.room.id, participant);
+  }
+
   clickParticipant(p: Participant, ev?: MouseEvent) {
     let prompt = this.mdDialog.prompt()
-          .title('Redigér navn')
-          .textContent('Angiv nyt navn for ' + p.phoneNumber)
-          .placeholder('Navn på person')
-          .ariaLabel('Navn på person')
-          .initialValue(p.name)
-          .targetEvent(ev)
-          .ok('Ok')
-          .cancel('Annuller');
+      .title('Redigér navn')
+      .textContent('Angiv nyt navn for ' + p.phoneNumber)
+      .placeholder('Navn på person')
+      .ariaLabel('Navn på person')
+      .initialValue(p.name)
+      .targetEvent(ev)
+      .ok('Ok')
+      .cancel('Annuller');
 
-    this.mdDialog.show(prompt).then(function() {
-      
+    this.mdDialog.show(prompt).then(function () {
+
     });
   }
 

@@ -1,4 +1,5 @@
 import { Component, OnInit, Inject } from 'ng-metadata/core';
+import { AuthenticationService } from '../shared';
 
 interface Entry {
   title: string;
@@ -9,7 +10,7 @@ interface Entry {
   selector: 'bt-sidenav',
   styles: [ require( './sidenav.component.scss' ) ],
   template: `
-    <md-sidenav layout="column" class="md-sidenav-left md-whiteframe-4dp" md-is-locked-open="$mdMedia('gt-sm')" 
+    <md-sidenav layout="column" class="md-sidenav-left md-whiteframe-4dp" md-is-locked-open="$mdMedia('gt-sm') && $ctrl.showMenu()" 
       md-component-id="menu">
       <md-toolbar class="md-theme-light">
         <div class="md-toolbar-tools">
@@ -22,6 +23,7 @@ interface Entry {
           <span flex></span>
         </div>
       </md-toolbar>
+      
       <md-list>
         <md-list-item ng-repeat="entry in $ctrl.entries" ng-class="{active:$ctrl.activeEntry === entry.key}" 
           ng-click="$ctrl.goto(entry.key)">
@@ -45,7 +47,8 @@ export class SidenavComponent implements OnInit {
   private activeEntry = 'room';
 
   constructor( @Inject( '$log' ) private _$log: ng.ILogService,
-    @Inject('$mdSidenav') private mdSideNav: ng.material.ISidenavService) {}
+    @Inject('$mdSidenav') private mdSideNav: ng.material.ISidenavService,
+    private authService: AuthenticationService) {}
 
   ngOnInit() {
     this._$log.log( 'Initializing sidenav' );
@@ -54,5 +57,9 @@ export class SidenavComponent implements OnInit {
   goto(key) {
     this.activeEntry = key;
     this.mdSideNav('menu').close();
+  }
+
+  showMenu() {
+    return this.authService.isAuthorized();
   }
 }

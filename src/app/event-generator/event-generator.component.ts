@@ -9,8 +9,10 @@ import { MeetingService, Room, Participant, SwitchBoardService,
     <md-button class="md-raised" ng-click="$ctrl.startConf()">Start møde</md-button>
     <md-button class="md-raised" ng-click="$ctrl.endConf()">Stop møde</md-button>
     <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive" ng-click="$ctrl.toggleHost()">Toggle host</md-button>
-    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive || !$ctrl.hasMoreParticipants()" ng-click="$ctrl.addParticipant()">+ Participant</md-button>
-    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive || !$ctrl.hasActiveParticipants()" ng-click="$ctrl.removeParticipant()">- Participant</md-button>
+    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive || !$ctrl.hasMoreParticipants()" 
+        ng-click="$ctrl.addParticipant()">+ Participant</md-button>
+    <md-button class="md-raised" ng-disabled="!$ctrl.meetingRoomActive || !$ctrl.hasActiveParticipants()" 
+        ng-click="$ctrl.removeParticipant()">- Participant</md-button>
   </div>
   `
 })
