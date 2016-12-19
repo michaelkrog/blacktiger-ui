@@ -1,5 +1,4 @@
 import { Component, OnInit, Inject } from 'ng-metadata/core';
-import { StompClient } from './shared';
 import { SwitchBoardService, AuthenticationService } from './shared';
 
 @Component({
@@ -16,26 +15,16 @@ import { SwitchBoardService, AuthenticationService } from './shared';
 })
 export class AppComponent implements OnInit {
 
-  stompClient: StompClient;
-
-  constructor( @Inject('$log') private _$log: ng.ILogService,
+  constructor(@Inject('$log') private _$log: ng.ILogService,
     @Inject('$location') private locationService: ng.ILocationService,
     @Inject('$mdSidenav') private mdSideNav: ng.material.ISidenavService,
-    private switchBoard: SwitchBoardService, private authService: AuthenticationService,
-  ) {
-
-    authService.onChange().subscribe(() => this.doAuthenticationRedirection());
-  }
+    private switchBoard: SwitchBoardService, private authService: AuthenticationService) { }
 
   ngOnInit() {
     this._$log.log('Initializing AppComponent');
 
-    this.stompClient = new StompClient('http://localhost:8080/blacktiger/socket');
-    this.stompClient.connect(null, null, () => {
-      this._$log.info('Websocket connected');
-      this.switchBoard.addDataSource(this.stompClient.subscribe('/queue/events/*'));
-    }, () => {
-
+    this.authService.onChange().subscribe((authenticated) => {
+            this.doAuthenticationRedirection();
     });
 
     this.doAuthenticationRedirection();
@@ -46,7 +35,7 @@ export class AppComponent implements OnInit {
   }
 
   private doAuthenticationRedirection() {
-    if (!this.authService.isAuthorized()) {
+    if (!this.authService.isAuthenticated()) {
       this.locationService.path('/signin');
     } else {
       this.locationService.path('/room');

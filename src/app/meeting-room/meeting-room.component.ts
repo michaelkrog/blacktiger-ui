@@ -62,7 +62,7 @@ import { MeetingService, Room, Participant, HistoryService, HistoryEntry } from 
           <md-progress-circular ng-if="!participant.muted" md-diameter="40" class="md-accent md-hue-3"></md-progress-circular>
           <img ng-src="{{participant.avatar}}" ng-if="participant.avatar" class="md-avatar" />
           <div class="md-list-item-text">
-            <h3>{{participant.name}} ({{participant.phoneNumber}})</h3>
+            <h3>{{participant.name}} ({{participant.phoneNumber}}) <span ng-if="participant.commentRequested">kuk kuk</span></h3>
             <p>10 minutter - 1 opkald siden 15:50</p>
             <md-button class="md-secondary md-icon-button" ng-click="$ctrl.toggleMute(participant)">
               <md-tooltip>
@@ -116,17 +116,28 @@ export class MeetingRoomComponent implements OnInit {
     private meetingService: MeetingService,
     private historyService: HistoryService) {
       
+    let that = this;
     this.meetingService.onMeetingStart.subscribe((room: Room) => {
-      this.room = room;
+      that.room = room;
     });
 
     this.meetingService.onMeetingEnd.subscribe((room: Room) => {
-      this.room = null;
+      that.room = null;
+    });
+
+    this.meetingService.onMeetingJoin.subscribe(() => {
+      that.room = this.meetingService.findRoom(this.room.id);
+    });
+
+    this.meetingService.onMeetingLeave.subscribe(() => {
+      that.room = this.meetingService.findRoom(this.room.id);
     });
 
     this.historyService.onHistoryUpdated.subscribe(() => {
-      this.historyEntries = this.historyService.findAllByRoomAndActive(this.room, false);
+      that.historyEntries = this.historyService.findAllByRoomAndActive(this.room, false);
     });
+
+    this.room = this.meetingService.findRoom('H45-0000-1');
   }
 
   ngOnInit() {

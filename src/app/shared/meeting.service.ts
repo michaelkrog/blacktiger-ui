@@ -1,7 +1,6 @@
 import { Injectable, Inject, EventEmitter } from 'ng-metadata/core';
-import { ParticipantService, RoomService, Room, Participant } from '../shared';
-import { SwitchBoardService } from './switch-board.service';
-import { ConferenceEvent, ConferenceStartEvent, ParticipantEvent, PhonebookUpdateEvent } from './event.model';
+import { ParticipantService, RoomService, SwitchBoardService, Room, Participant, AuthenticationService, StompClient } from '../shared';
+import { ConferenceEvent, ConferenceStartEvent, ParticipantEvent, ParticipantCommentRequestEvent, PhonebookUpdateEvent } from './event.model';
 
 @Injectable()
 export class MeetingService {
@@ -12,9 +11,10 @@ export class MeetingService {
     onMeetingJoin = new EventEmitter();
     onMeetingLeave = new EventEmitter();
     onMeetingChange = new EventEmitter();
+    stompClient: StompClient;
 
-    constructor(@Inject('$log') private log: ng.ILogService, private participantService: ParticipantService,
-        private roomService: RoomService, switchBoard: SwitchBoardService) {
+    constructor( @Inject('$log') private log: ng.ILogService, private participantService: ParticipantService,
+        private roomService: RoomService, private switchBoard: SwitchBoardService, private authService: AuthenticationService) {
 
         switchBoard.onInitializing.subscribe(() => this.handleInitializing());
         switchBoard.onLostConnection.subscribe(() => this.handleLostConnection());
@@ -22,13 +22,43 @@ export class MeetingService {
         switchBoard.onConferenceEnd.subscribe((ev: ConferenceEvent) => this.handleConfEnd(ev.roomNo));
         switchBoard.onJoin.subscribe((ev: ParticipantEvent) => this.handleJoin(ev.roomNo, ev.participant));
         switchBoard.onLeave.subscribe((ev: ParticipantEvent) => this.handleLeave(ev.roomNo, ev.participant.channel));
-        switchBoard.onCommentRequest.subscribe((ev: ParticipantEvent) => this.handleCommentRequest(ev.roomNo, ev.participant.channel));
-        switchBoard.onCommentRequestCancel.subscribe((ev: ParticipantEvent) => 
-            this.handleCommentRequestCancel(ev.roomNo, ev.participant.channel));
+        switchBoard.onCommentRequest.subscribe((ev: ParticipantCommentRequestEvent) => 
+            this.handleCommentRequest(ev.roomNo, ev.channel));
+        switchBoard.onCommentRequestCancel.subscribe((ev: ParticipantCommentRequestEvent) =>
+            this.handleCommentRequestCancel(ev.roomNo, ev.channel));
         switchBoard.onMute.subscribe((ev: ParticipantEvent) => this.handleMute(ev.roomNo, ev.participant.channel));
         switchBoard.onUnmute.subscribe((ev: ParticipantEvent) => this.handleUnmute(ev.roomNo, ev.participant.channel));
         switchBoard.onPhoneBookUpdate.subscribe((ev: PhonebookUpdateEvent) => this.handlePhoneBookUpdate(ev.phoneNumber, ev.newName));
-        
+
+        this.authService.onChange().subscribe((authenticated) => this.handlerAutenticationState(authenticated));
+        this.handlerAutenticationState(this.authService.isAuthenticated());
+    }
+
+    private handlerAutenticationState(authenticated: boolean) {
+        if (authenticated) {
+            this.stompClient = new StompClient('http://localhost:8080/blacktiger/socket');
+            this.stompClient.connect(null, null).then(() => {
+                this.log.info('Websocket connected');
+
+                this.roomService.findAll(null, 'full').then((rooms: Room[]) => {
+                    this.handleConfStart(rooms[0]);
+                    this.switchBoard.setDataSource(
+                        this.stompClient.subscribe('/queue/events/' + rooms[0].id).map((data) => {
+                            return JSON.parse(data.body);
+                        }));
+                });
+
+            }).catch(() => {
+                alert('Cannot connect websocket');
+            });
+        } else {
+            this.switchBoard.setDataSource(null);
+            if (this.stompClient != null) {
+                this.stompClient.disconnect();
+                this.stompClient = null;
+            }
+            this.rooms = [];
+        }
     }
 
     private getRoomById(id: string): Room {
@@ -123,7 +153,7 @@ export class MeetingService {
 
             if (existingParticipant === null) {
                 room.participants.push(participant);
-                this.onMeetingJoin.emit({room: room, participant: participant});
+                this.onMeetingJoin.emit({ room: room, participant: participant });
             }
         }
     };
@@ -150,7 +180,7 @@ export class MeetingService {
         if (participant !== null) {
             let i = room.participants.indexOf(participant);
             room.participants.splice(i, 1);
-            this.onMeetingLeave.emit({room: room, participant: participant});
+            this.onMeetingLeave.emit({ room: room, participant: participant });
         }
     };
 
@@ -160,7 +190,7 @@ export class MeetingService {
 
         if (participant !== null && !participant.commentRequested) {
             participant.commentRequested = true;
-            this.onMeetingChange.emit({room: room, participant: participant});
+            this.onMeetingChange.emit({ room: room, participant: participant });
         }
     };
 
@@ -170,7 +200,7 @@ export class MeetingService {
 
         if (participant !== null && participant.commentRequested) {
             participant.commentRequested = false;
-            this.onMeetingChange.emit({room: room, participant: participant});
+            this.onMeetingChange.emit({ room: room, participant: participant });
         }
     };
 
@@ -180,7 +210,7 @@ export class MeetingService {
 
         if (participant !== null && !participant.muted) {
             participant.muted = true;
-            this.onMeetingChange.emit({room: room, participant: participant});
+            this.onMeetingChange.emit({ room: room, participant: participant });
         }
     };
 
@@ -191,7 +221,7 @@ export class MeetingService {
         if (participant !== null && participant.muted) {
             participant.muted = false;
             participant.commentRequested = false;  // Force the comment request to false now – they have been unmuted
-            this.onMeetingChange.emit({room: room, participant: participant});
+            this.onMeetingChange.emit({ room: room, participant: participant });
         }
     };
 
@@ -201,7 +231,7 @@ export class MeetingService {
             room.participants.forEach((participant) => {
                 if (phoneNumber === participant.phoneNumber) {
                     participant.name = name;
-                    this.onMeetingChange.emit({room: room, participant: participant});
+                    this.onMeetingChange.emit({ room: room, participant: participant });
                 }
             });
         });
@@ -209,16 +239,16 @@ export class MeetingService {
 
     getTotalParticipantsByCommentRequested(value: boolean): number {
         return this.getParticipantsCountByFilter((participant) => {
-                return participant.host !== true && participant.commentRequested === value;
+            return participant.host !== true && participant.commentRequested === value;
         });
     }
-    
+
     getTotalParticipantsByMuted(value: boolean): number {
         return this.getParticipantsCountByFilter((participant) => {
             return participant.host !== true && participant.muted === value;
         });
     }
-       
+
     getTotalParticipants(): number {
         return this.getParticipantsCountByFilter((participant) => {
             return participant.host !== true;
@@ -254,12 +284,12 @@ export class MeetingService {
     kickByRoomAndChannel(room: string, participant: Participant) {
         this.participantService.kick(room, participant.channel);
     }
-        
+
     muteByRoomAndChannel(room: string, participant: Participant) {
         this.participantService.mute(room, participant.channel);
         participant.commentRequested = false;
     }
-        
+
     unmuteByRoomAndChannel(room: string, participant: Participant) {
         if (!this.hasHost(this.getRoomById(room))) {
             this.log.warn('Room \'' + room + '\' has no host. It is not possible to unmute participants in rooms without a host.')
@@ -269,7 +299,7 @@ export class MeetingService {
         this.participantService.unmute(room, participant.channel);
         participant.commentRequested = false;
     }
-        
+
     clear() {
         this.rooms = [];
     }

@@ -60,6 +60,6 @@ export class SidenavComponent implements OnInit {
   }
 
   showMenu() {
-    return this.authService.isAuthorized();
+    return this.authService.isAuthenticated();
   }
 }

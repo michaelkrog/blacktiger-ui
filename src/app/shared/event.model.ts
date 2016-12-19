@@ -14,6 +14,10 @@ export interface ParticipantEvent extends ConferenceEvent {
     participant: Participant
 }
 
+export interface ParticipantCommentRequestEvent extends ConferenceEvent {
+    channel: string;
+}
+
 export interface PhonebookUpdateEvent {
     phoneNumber: string; 
     newName: string;

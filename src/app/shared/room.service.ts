@@ -14,11 +14,9 @@ export class RoomService extends BaseService {
 
     findAll(search?: string, mode?: string): Promise<Room[]> {
         let config: angular.IRequestShortcutConfig = {
-            headers: {
-                common: {
-                    search: search,
-                    mode: mode
-                }
+            params: {
+                search: search,
+                mode: mode
             }
         };
 

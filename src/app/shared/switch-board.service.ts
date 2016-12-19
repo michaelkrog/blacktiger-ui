@@ -1,7 +1,7 @@
 import { Injectable, Inject, EventEmitter } from 'ng-metadata/core';
 import { Room } from './room.model';
-import { ConferenceEvent, ParticipantEvent, PhonebookUpdateEvent} from './event.model';
-import { Observable } from 'rxjs/Observable';
+import { ConferenceEvent, ParticipantEvent, PhonebookUpdateEvent } from './event.model';
+import { Observable, Subscription } from 'rxjs/Rx';
 
 @Injectable()
 export class SwitchBoardService {
@@ -19,15 +19,47 @@ export class SwitchBoardService {
     onUnmute = new EventEmitter<ParticipantEvent>();
     onPhoneBookUpdate = new EventEmitter();
 
-    constructor(@Inject('$log') private log: ng.ILogService) {
+    subscription: Subscription = null;
 
+    constructor( @Inject('$log') private log: ng.ILogService, @Inject('$timeout') private timeout: ng.ITimeoutService) { }
+
+    public setDataSource(observable: Observable<ConferenceEvent>) {
+        this.log.debug('Setting datasource');
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+
+        if (observable != null) {
+            this.subscription = observable.subscribe((data: ConferenceEvent) => {
+                this.log.debug(data);
+                this.timeout(() => {
+                    switch (data.type) {
+                        case 'ConferenceStart':
+                            this.onConferenceStart.emit(data);
+                            break;
+                        case 'ConferenceEnd':
+                            this.onConferenceEnd.emit(data);
+                            break;
+                        case 'Join':
+                            this.onJoin.emit(<ParticipantEvent>data);
+                            break;
+                        case 'Leave':
+                            this.onLeave.emit(<ParticipantEvent>data);
+                            break;
+                        case 'CommentRequest':
+                            this.onCommentRequest.emit(<ParticipantEvent>data);
+                            break;
+                        case 'CommentRequestCancel':
+                            this.onCommentRequestCancel.emit(<ParticipantEvent>data);
+                            break;
+                        
+                    }
+                });
+            });
+        }
     }
 
-    public addDataSource(observable: Observable<ConferenceEvent>) {
-        this.log.debug('Adding datasource');
-        observable.subscribe((data: ConferenceEvent) => {
-            this.log.debug(data);
-        });
-    }
-    
+
+
 }

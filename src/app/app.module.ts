@@ -28,9 +28,9 @@ import { provideState } from './app.config';
     ngMaterial,
     router,
     provideState,
-    MeetingService, 
-    ParticipantService,
     SwitchBoardService,
+    MeetingService,  
+    ParticipantService,
     HistoryService,
     RoomService,
     AuthenticationService
